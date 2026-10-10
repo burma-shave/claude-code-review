@@ -1,11 +1,15 @@
 # Tasks
 
+## Implementation inputs and evidence
+
+The implementation contract is `specs/claude-code-review/spec.md` together with the decisions in `design.md`. The section "Recorded built-in interface reference (Claude Code 2.1.296)" in `design.md` contains the attributed upstream argument and behavior reference needed for fixtures; do not require the original conversation, a separate maintainer-supplied document, or the 2.1.296 binary. Distinguish fixtures derived from that report from fake-process tests and actual installed-CLI observations. Live smoke tests still require separate explicit authorization; recording this reference does not grant it.
+
 ## 1. Package and built-in compatibility baseline
 
 - [ ] 1.1 Create the package manifest with explicit Pi extension/skill resource paths, host peer dependencies, TypeScript configuration, and test scripts; verify dependency installation, type checking, and an initial test run succeed without bundling Pi host packages.
-- [ ] 1.2 Add attributed fixtures for the supplied 2.1.296 built-in argument reference and a bounded best-effort installed-version probe; verify fake-CLI tests attempt review with 2.1.281, 2.1.296, unknown/new versions, and unavailable/malformed version output, while missing executables fail clearly and no case installs or upgrades software.
+- [ ] 1.2 Derive attributed fixtures from the self-contained "Recorded built-in interface reference (Claude Code 2.1.296)" section in `design.md`, and implement a bounded best-effort installed-version probe; verify fake-CLI tests attempt review with 2.1.281, 2.1.296, unknown/new versions, and unavailable/malformed version output, while missing executables fail clearly and no case installs or upgrades software.
 - [ ] 1.3 In a separately authorized smoke environment using whatever Claude CLI is installed, observe print-mode `/code-review` resolution, target grammar, reserved tokens/whitespace, JSON result shape, context propagation via `--append-system-prompt`, and legacy/custom skill collision behavior; record results or environment limitations in fixtures/documentation without introducing a version allowlist or 2.1.296 requirement.
-- [ ] 1.4 Document the installed-CLI policy, diagnostic-only version reporting, Pi prerequisites, authentication, the built-in-versus-marketplace distinction, and no automatic upgrade or plugin fallback in README; verify instructions agree with fixtures and the local package resource layout.
+- [ ] 1.4 Document the installed-CLI policy, diagnostic-only version reporting, Pi prerequisites, authentication, the built-in-versus-marketplace distinction, and no automatic upgrade or plugin fallback in README; verify instructions agree with the recorded reference in `design.md`, derived fixtures, and the local package resource layout.
 
 ## 2. Structured inputs and invocation construction
 
