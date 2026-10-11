@@ -25,10 +25,13 @@ async function fixture(body: string, action: (cwd: string, executable: string, r
 
 const success = `console.log(JSON.stringify({type:'result',subtype:'success',is_error:false,result:'done'}));`;
 
-test('extension registration installs only a shutdown handler with no startup work or UI', () => {
+test('extension registration installs a shutdown handler and tool with no startup work or UI', () => {
   const registrations: string[] = [];
-  codeReviewExtension({ on: (event: string) => { registrations.push(event); } } as unknown as ExtensionAPI);
-  assert.deepEqual(registrations, ['session_shutdown']);
+  codeReviewExtension({
+    on: (event: string) => { registrations.push(event); },
+    registerTool: (tool: { name: string }) => { registrations.push(tool.name); },
+  } as unknown as ExtensionAPI);
+  assert.deepEqual(registrations, ['session_shutdown', 'claude_code_review']);
 });
 
 test('shutdown handler cancels and awaits active runs, repeated cleanup shares a promise', async () => {

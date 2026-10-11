@@ -2,12 +2,13 @@ import { Type } from 'typebox';
 import type { RunResult } from './runner.js';
 
 const nullableString = Type.Union([Type.String(), Type.Null()]);
-const effort = Type.Union(['low', 'medium', 'high', 'xhigh', 'max', 'ultra'].map(value => Type.Literal(value)));
+export const EffortSchema = Type.Union([Type.Literal('low'), Type.Literal('medium'), Type.Literal('high'), Type.Literal('xhigh'), Type.Literal('max'), Type.Literal('ultra')]);
 const findingValue = Type.Union([Type.Integer({ minimum: 1 }), Type.Literal('all'), Type.Literal('default')]);
 export const TargetSchema = Type.Union([
   Type.Object({ kind: Type.Literal('pr'), number: Type.Integer({ minimum: 1 }), repository: Type.Optional(Type.String()) }, { additionalProperties: false }),
   Type.Object({ kind: Type.Literal('pr-url'), url: Type.String() }, { additionalProperties: false }),
-  ...['branch', 'path'].map(kind => Type.Object({ kind: Type.Literal(kind), value: Type.String() }, { additionalProperties: false })),
+  Type.Object({ kind: Type.Literal('branch'), value: Type.String() }, { additionalProperties: false }),
+  Type.Object({ kind: Type.Literal('path'), value: Type.String() }, { additionalProperties: false }),
 ]);
 
 /** Supplementary context is intentionally not duplicated in structured metadata. */
@@ -16,7 +17,7 @@ export const ResultSchema = Type.Object({
   selectedTarget: Type.Union([TargetSchema, Type.Null()]),
   target: nullableString,
   options: Type.Union([Type.Null(), Type.Object({
-    effort, effortSource: Type.Union([Type.Literal('defaulted'), Type.Literal('user-supplied')]),
+    effort: EffortSchema, effortSource: Type.Union([Type.Literal('defaulted'), Type.Literal('user-supplied')]),
     fix: Type.Boolean(), comment: Type.Boolean(),
     findingLimit: Type.Union([
       Type.Object({ source: Type.Literal('inherited') }, { additionalProperties: false }),
@@ -45,8 +46,8 @@ export function resultMetadata(run: RunResult) {
       findingLimit: input.findingLimit, timeoutSeconds: input.timeoutSeconds,
       ...(input.cloudPost ? { cloudPost: input.cloudPost } : {}),
     } : null,
-    cwd: run.cwd, version: run.version, durationMs: run.durationMs,
-    exitCode: run.exitCode, exitSignal: run.exitSignal, logs: run.logs, diagnostic: run.diagnostic,
+    cwd: run.cwd, version: { ...run.version }, durationMs: run.durationMs,
+    exitCode: run.exitCode, exitSignal: run.exitSignal, logs: run.logs ? { ...run.logs } : null, diagnostic: run.diagnostic,
   };
 }
 
