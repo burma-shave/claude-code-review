@@ -8,7 +8,7 @@ Pi users need a structured way to invoke Claude Code's built-in `/code-review` s
 
 - Introduce a standalone Pi package with a `claude_code_review` tool and a `claude-code-review` wrapper skill.
 - Formalize current-diff, PR number/URL, branch/range, and file/directory targets; local effort levels; `--fix`; `--comment`; and `--max-findings` (positive integer, `all`, or `default`).
-- Accept optional supplementary context separately from the review target, delivered through Claude's appended system prompt rather than appended slash-command arguments.
+- Accept optional supplementary context separately from the review target, delivered in a preceding text block of one stream-JSON user message, with the unchanged slash command in its final text block rather than adding context to target arguments.
 - Provide working-directory selection, bounded execution, cancellation, readable output, complete run logs, and clear errors.
 - Pass `--dangerously-skip-permissions` by default to Claude Code, bypassing its permission checks for unattended execution. Keep fixes and comments separately opt-in. Default omitted effort to an explicit `medium` review argument, with user-supplied effort overriding it. Preserve omitted upstream finding-limit behavior while documenting its persistent default.
 - Recognize but reject automated `ultra` and its `--post`/`--no-post` options with manual-invocation guidance; do not silently substitute a local effort level.
@@ -27,8 +27,8 @@ None. The project's capability inventory is empty.
 ## Impact
 
 - Proposed new package manifest, TypeScript extension and runner modules, wrapper skill, README, and tests in this project; no existing implementation is modified.
-- Depends on the installed authenticated Claude Code CLI and Pi's extension API. PR reviews depend on upstream GitHub CLI availability/authentication; repository context depends on the selected working directory.
+- Depends on the installed authenticated Claude Code CLI and Pi's extension API. The Claude environment must resolve `/code-review` to the built-in skill, not a same-named custom or legacy command. This is a documented prerequisite, not a wrapper detection or handshake feature. PR reviews depend on upstream GitHub CLI availability/authentication; repository context depends on the selected working directory.
 - Fix mode can change the reviewed working tree; comment mode can publish externally. These modes must be explicitly requested and must never be enabled by optional context or inferred automatically.
 - Earlier local discovery observed CLI 2.1.281; this is historical evidence, not an environment prerequisite. The maintainer's report of the 2.1.296 built-in contract is preserved in `design.md`, with attribution and verification limits. No original conversation, separate reference material, or particular installed version is needed to derive implementation fixtures. The marketplace plugin is explicitly outside scope.
 - Default permission bypass grants Claude broader execution access and is not a filesystem or network sandbox. Document trusted or isolated execution environments; disabling fix/comment flags does not enforce read-only access.
-- Out of scope: implementing a review algorithm, Maglev-specific state or review drafts, automatic CLI upgrades, unattended cloud reviews, package publication, and arbitrary user-supplied CLI permission policies.
+- Out of scope: implementing a review algorithm, Maglev-specific state or review drafts, automatic CLI upgrades, unattended cloud reviews, package publication, arbitrary user-supplied CLI permission policies, and automatic skill-collision detection or remediation.

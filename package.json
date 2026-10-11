@@ -1,0 +1,28 @@
+{
+  "name": "pi-claude-code-review",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pi wrapper for the installed Claude Code built-in /code-review skill",
+  "type": "module",
+  "keywords": ["pi-package"],
+  "engines": { "node": ">=22.19.0" },
+  "files": ["extensions", "src", "skills", "README.md"],
+  "pi": {
+    "extensions": ["./extensions/code-review.ts"],
+    "skills": ["./skills/claude-code-review"]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "npm run typecheck && npm test"
+  }
+}

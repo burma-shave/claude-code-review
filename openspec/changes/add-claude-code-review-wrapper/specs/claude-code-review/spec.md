@@ -9,6 +9,11 @@ Expose Claude Code's built-in code review through a structured Pi tool and wrapp
 ### Requirement: Built-in skill invocation
 The system SHALL attempt Claude Code's built-in `/code-review` using the installed CLI in a fresh non-interactive process, without a version allowlist or minimum-version gate. It MUST report missing executables and invocation failures without automatic installation, upgrades, marketplace-plugin fallback, or substituting its own review algorithm.
 
+#### Scenario: Configured command name
+- **WHEN** the user consults installation guidance
+- **THEN** it documents that `/code-review` must resolve to the built-in skill, not a same-named custom or legacy command
+- **AND** collision detection/remediation and command-identity attestation are outside scope; the wrapper does not add an initialization handshake or disable customizations to force resolution
+
 #### Scenario: Installed version
 - **WHEN** a valid review is requested with an installed Claude CLI, regardless of version or prior verification
 - **THEN** the system attempts the built-in `/code-review` and reports its result
@@ -98,15 +103,17 @@ The system SHALL add `--fix` and `--comment` only when their respective typed bo
 - **AND** the built-in skill's explanation that commenting does not apply is retained in the output
 
 ### Requirement: Separate supplementary context
-The system SHALL accept optional context separately from the target and deliver it to Claude without adding it to the slash-command target arguments or modifying project instruction files. It MUST communicate that context is review guidance, not permission to change the selected options.
+The system SHALL deliver optional context and wrapper policy in a preceding text block of one JSON-serialized stream-JSON user message, with only the canonical slash command in the final text block. Context MUST remain separate from target arguments and MUST NOT authorize option changes. The system MUST NOT modify project instructions, synthesize an earlier conversation, or rely on `--append-system-prompt` for supplementary-context delivery.
 
 #### Scenario: Focused review context
 - **WHEN** a PR target and multiline focus notes are supplied
-- **THEN** Claude receives both the unchanged target and the notes as separate supplementary instructions
+- **THEN** the notes are included in the preceding text block and the final text block contains only the slash command with the unchanged target
+- **AND** the message is sent as a single serialized stdin record, without an initialization handshake
 
 #### Scenario: No context
 - **WHEN** context is omitted
 - **THEN** no supplementary context is synthesized from Pi's conversation or other files
+- **AND** the wrapper-policy block remains present before the final slash-command block
 
 ### Requirement: Manual-only cloud review
 The system MUST reject tool execution of `ultra` and cloud posting controls `--post`/`--no-post`, without launching a cloud job or silently selecting another level. It SHALL explain the reported interactive-only restriction and provide manual command guidance including billing and access caveats.
@@ -125,7 +132,8 @@ The system MUST launch Claude without shell interpolation and validate inputs be
 
 #### Scenario: Shell metacharacters
 - **WHEN** context contains quotes, newlines, or shell metacharacters
-- **THEN** these are delivered as context data and do not execute host shell commands
+- **THEN** JSON serialization retains them as data in the preceding text block rather than additional stdin records or slash-command arguments
+- **AND** the final slash-command block stays unchanged and no host shell interpolation occurs
 
 #### Scenario: Ambiguous target
 - **WHEN** a target begins with a flag, contains a command-breaking newline, or collides with the built-in effort/option grammar
@@ -165,8 +173,8 @@ The system SHALL return readable output and structured metadata identifying the 
 
 #### Scenario: Successful review
 - **WHEN** Claude exits successfully
-- **THEN** its findings or no-findings response is returned with completed execution metadata
-- **AND** the wrapper does not infer that exit success means zero findings
+- **THEN** its findings or no-findings response is extracted from the final top-level result envelope using bounded incremental newline-delimited stream-JSON decoding and returned with completed execution metadata
+- **AND** intermediate events are not presented as a completed review, and exit success is not interpreted as zero findings
 
 #### Scenario: Failed review
 - **WHEN** Claude fails or reports an execution error
@@ -176,8 +184,17 @@ The system SHALL return readable output and structured metadata identifying the 
 - **WHEN** output exceeds the display limit
 - **THEN** the response is truncated with an explicit notice and the complete local log path
 
+#### Scenario: Invalid final result
+- **WHEN** the final top-level result is missing, malformed, oversized, or duplicated
+- **THEN** the system reports a protocol failure with retained logs rather than a successful empty review
+
+#### Scenario: Large intermediate event
+- **WHEN** an intermediate stream-JSON event exceeds the decoder's in-memory bound but a valid final result follows
+- **THEN** the system retains the full event in the stdout log, discards its buffered remainder through the next newline, and continues decoding the final result
+- **AND** it does not invent findings or mistake the intermediate event for a final review
+
 ### Requirement: Wrapper skill and installation guidance
-The package SHALL include a discoverable wrapper skill documenting tool inputs, target examples, context delivery, inherited settings, side effects, manual-only options, and CLI compatibility. It MUST route supported requests through the tool and ask for clarification when the target or side-effect authorization is unclear.
+The package SHALL include a discoverable wrapper skill documenting tool inputs, target examples, context delivery, inherited settings, side effects, manual-only options, and CLI compatibility, including the prerequisite that `/code-review` is not shadowed by a custom or legacy command. It MUST route supported requests through the tool and ask for clarification when the target or side-effect authorization is unclear.
 
 #### Scenario: Wrapper use
 - **WHEN** a user requests a PR review with extra focus context through the wrapper skill

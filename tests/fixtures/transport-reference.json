@@ -1,0 +1,17 @@
+{
+  "source": "openspec/changes/add-claude-code-review-wrapper/design.md#recorded-context-transport-observations-installed-claude-code-21296",
+  "attribution": "Derived from recorded authorized observations and approved wrapper design; not a raw upstream capture or a compatibility/version gate.",
+  "argv": ["--print", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose", "--no-session-persistence", "--dangerously-skip-permissions"],
+  "recordCount": 1,
+  "recordType": "user",
+  "sessionId": "",
+  "role": "user",
+  "blocks": ["policy plus optional context", "canonical slash command"],
+  "observedCommand": "/code-review medium sample.py",
+  "observedContextMarker": "CONTEXT_BLOCK_296",
+  "foregroundContextEffective": true,
+  "nestedFindersExercised": false,
+  "initializationHandshake": false,
+  "positionalPrompt": false,
+  "appendSystemPrompt": false
+}

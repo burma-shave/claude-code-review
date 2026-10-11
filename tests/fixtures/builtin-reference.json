@@ -1,0 +1,43 @@
+{
+  "referenceVersion": "2.1.296",
+  "source": "openspec/changes/add-claude-code-review-wrapper/design.md#recorded-built-in-interface-reference-claude-code-21296",
+  "attribution": "Maintainer report derived from the argument hint and strings in the Claude Code 2.1.296 binary; not independently verified runtime evidence.",
+  "argumentHint": "/code-review [low|medium|high|xhigh|max|ultra] [--fix] [--comment] [<pr#>|<branch>|<path>] [--max-findings <n>|all|default]",
+  "localEfforts": ["low", "medium", "high", "xhigh", "max"],
+  "targets": {
+    "omitted": "Committed @{upstream}...HEAD plus uncommitted working-tree changes",
+    "pr": "PR number or URL, fetched with gh",
+    "branch": "Branch or a...b range",
+    "path": "File or directory"
+  },
+  "effort": {
+    "lowAndMedium": "Fewer findings, high confidence only",
+    "highXhighAndMax": "Wider coverage; some findings may be uncertain",
+    "subagents": "At levels using subagents, about one finder per 150 diff lines, bounded between two and eight",
+    "omitted": "Reuses the last typed level; persists upstream"
+  },
+  "flags": {
+    "fix": "Applies findings after review, skipping those judged wrong or not worth fixing, then runs relevant checks",
+    "comment": "Inline PR comments; general note on GitLab MR; findings plus non-applicability explanation for a non-PR target",
+    "maxFindings": "Positive integer cap, all lifts the cap, default resets it; selection persists and omission inherits it",
+    "position": "Flags may precede or follow the target"
+  },
+  "cloud": {
+    "effort": "ultra",
+    "alias": "/ultrareview",
+    "restriction": "Billed multi-agent cloud review requiring claude.ai access and direct user invocation; Claude cannot launch it",
+    "post": "Offers a single PR comment from the user's GitHub account; ignored if server-side posting is disabled",
+    "noPost": "Hides the posting option",
+    "wrapperPolicy": "Reject ultra and cloud posting controls; provide manual guidance only"
+  },
+  "context": {
+    "slashCommandOption": null,
+    "localArguments": "Non-level/non-flag argument text is inserted verbatim as Review target, not supplementary notes",
+    "ultraArguments": "Cloud reviewer does not receive extra notes; local session uses them to prioritize returned findings",
+    "interactive": "Session or fork can receive prior conversation context",
+    "projectInstructions": "CLAUDE.md loads normally; AGENTS.md requires an explicit import such as @AGENTS.md",
+    "wrapperTransport": "One stream-JSON user message with wrapper policy and optional context in a preceding text block, canonical slash command in the final text block; no handshake or append-system-prompt"
+  },
+  "unverified": ["target quoting/escaping", "print-mode result shape", "context propagation to delegated agents", "custom/legacy skill collision precedence"],
+  "versionPolicy": "Diagnostic reference only; no version allowlist or minimum version"
+}
