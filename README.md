@@ -122,3 +122,29 @@ Command: `/code-review medium --fix --comment ./high`
 For a numeric PR with no explicit repository, use `{"target":{"kind":"pr","number":123}}` in a repository where authenticated `gh` can determine `owner/repo`. Missing context is an error, not an invented repository.
 
 An `{"effort":"ultra","cloudPost":"no-post"}` request fails without launching review. Manual guidance is `/code-review ultra --no-post` in an interactive Claude session with the intended target; claude.ai access and billing apply. `--post` offers publication, but server-side settings may disable it. No automatic substitution or cloud execution occurs.
+
+## Results
+
+Model-facing text starts with the execution status, includes the upstream final result (not reconstructed findings), and ends with full stdout/stderr log paths. The entire response is limited to 2000 lines/50 KiB; a truncation notice directs you to the retained logs. Read `logs.stdout` for the complete stream-JSON event sequence and `logs.stderr` for diagnostics. Intermediate events are not presented as the final review.
+
+`details` and `structuredContent` contain matching output-schema metadata:
+- `selectedTarget`: the typed selection, or null for current diff; `target`: the resolved command target (null for current diff or unresolved preflight).
+- `options`: effective effort and `effortSource` (`defaulted` or `user-supplied`), selected fix/comment booleans, timeout, and finding-limit selection. Omission reports `{ "source": "inherited" }`, never a guessed effective cap. Invalid input has null options. Context is not duplicated in metadata.
+- `cwd`, `durationMs`, `exitCode`, `exitSignal`, `logs`, and `diagnostic`. Preflight failures may have null exit information and logs.
+- `version`: `reported` with parsed version and raw output, `unrecognized` with raw output, or `unavailable` with optional diagnostic. This is not a compatibility gate.
+
+Status is `completed`, `failed`, `cancelled`, or `timed-out`. All but `completed` set `isError: true` while retaining structured diagnostics. Nonzero exit, an upstream result-level error even at exit zero, and invalid/missing/duplicate/oversized final results are failures. Cancellation/timeout preserve partial logs and do not roll back effects.
+
+**Completed execution does not mean zero findings or confirmed publication.** Read the upstream report; the wrapper does not infer finding counts or GitHub outcomes from prose or exit status.
+
+Example metadata selections from fake-result fixtures (not live publication evidence):
+
+```json
+{"status":"completed","options":{"effort":"medium","effortSource":"defaulted","fix":false,"comment":false,"findingLimit":{"source":"inherited"},"timeoutSeconds":1200}}
+```
+
+```json
+{"status":"completed","options":{"effort":"high","effortSource":"user-supplied","fix":true,"comment":true,"findingLimit":{"source":"user-supplied","value":"all"},"timeoutSeconds":1200}}
+```
+
+These are excerpts; the full result also includes the target, cwd, version, duration, exit information, diagnostic, and log paths. A report such as “One possible finding; publication not confirmed.” is still completed execution, not a clean-review or publication assertion.

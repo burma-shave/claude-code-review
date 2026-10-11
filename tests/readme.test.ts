@@ -4,8 +4,22 @@ import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { prepareCommand } from '../src/invocation.js';
 import { serializeReviewMessage } from '../src/transport.js';
+import { normalizeInput } from '../src/inputs.js';
+import { resultMetadata } from '../src/results.js';
+import type { RunResult } from '../src/runner.js';
 
 const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
+test('README result excerpts agree with normalized result fixtures', () => {
+  const excerpts = [...readme.matchAll(/```json\n(\{"status"[\s\S]*?)\n```/g)];
+  assert.equal(excerpts.length, 2);
+  for (const [index, raw] of excerpts.entries()) {
+    const excerpt = JSON.parse(raw[1]!);
+    const input = normalizeInput(index === 0 ? {} : { effort: 'high', fix: true, comment: true, maxFindings: 'all' });
+    const metadata = resultMetadata({ status: 'completed', input, target: null, cwd: '/checkout', version: { status: 'unavailable', version: null, raw: '', diagnostic: null }, durationMs: 1, exitCode: 0, exitSignal: null, logs: null, diagnostic: null, text: 'One possible finding; publication not confirmed.' } satisfies RunResult);
+    assert.deepEqual(excerpt, { status: metadata.status, options: metadata.options });
+  }
+});
+
 const snapshots = [...readme.matchAll(/```json\n([\s\S]*?)\n```\n\nCommand: `([^`]+)`/g)];
 
 test('README has invocation snapshots for every target and local effort', async () => {

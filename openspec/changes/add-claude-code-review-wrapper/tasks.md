@@ -34,7 +34,7 @@ The implementation contract is `specs/claude-code-review/spec.md` together with 
 - [x] 4.2 Implement result metadata and matching output schema for selected options, effective effort with defaulted/user-supplied source, inherited finding limits, target, cwd, diagnostic version or unavailable marker, duration, status, exit information, and log paths; verify schema validation tests and ensure failure results are marked as errors while retaining structured diagnostics.
 - [x] 4.3 Implement model-facing truncation with status and log notices within the 2000-line/50-KiB response limits; verify boundary tests for multibyte text, line limits, oversized text, and retained complete logs.
 - [x] 4.4 Register `claude_code_review` through the thin Pi extension adapter without startup subprocesses or UI requirements; verify mocked Pi registration/execution tests cover cancellation propagation, headless use, validation errors, and successful results.
-- [ ] 4.5 Document result/status semantics, full-log access, defaulted/user-supplied effort and inherited finding-limit reporting, and why completed execution does not imply zero findings or confirmed publication; verify examples against result fixtures.
+- [x] 4.5 Document result/status semantics, full-log access, defaulted/user-supplied effort and inherited finding-limit reporting, and why completed execution does not imply zero findings or confirmed publication; verify examples against result fixtures.
 
 ## 5. Wrapper skill
 
