@@ -38,7 +38,7 @@ The implementation contract is `specs/claude-code-review/spec.md` together with 
 
 ## 5. Wrapper skill
 
-- [ ] 5.1 Create `skills/claude-code-review/SKILL.md` with valid discovery frontmatter and instructions to use the tool, keep context separate, and clarify ambiguous targets; verify discovery diagnostics and request-to-input examples select the expected tool arguments, document the medium effort default, and preserve explicit effort overrides.
+- [x] 5.1 Create `skills/claude-code-review/SKILL.md` with valid discovery frontmatter and instructions to use the tool, keep context separate, and clarify ambiguous targets; verify discovery diagnostics and request-to-input examples select the expected tool arguments, document the medium effort default, and preserve explicit effort overrides.
 - [ ] 5.2 Add explicit user-authorization rules for fixes/comments, disclosure of default `--dangerously-skip-permissions`, prohibition of automatic side-effect retries or permission-policy changes after failure, and manual-only cloud guidance; verify scenario checks cover ordinary review with bypass enabled but fix/comment disabled, authorized fixes/comments, context requesting publication, trusted or isolated environment guidance, and unsupported ultra requests.
 - [ ] 5.3 Document local package installation/loading, wrapper invocation, CLI prerequisites including an unshadowed built-in `/code-review`, separate text-block context delivery examples, and disabling the package; verify the manifest points to the delivered extension/skill and that example requests agree with the typed interface.
 
