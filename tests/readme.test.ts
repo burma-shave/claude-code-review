@@ -20,7 +20,7 @@ test('README result excerpts agree with normalized result fixtures', () => {
   }
 });
 
-const snapshots = [...readme.matchAll(/```json\n([\s\S]*?)\n```\n\nCommand: `([^`]+)`/g)];
+const snapshots = [...readme.matchAll(/```json\n([^`]*?)\n```\n\nCommand: `([^`]+)`/g)];
 
 test('README has invocation snapshots for every target and local effort', async () => {
   assert.equal(snapshots.length, 7);

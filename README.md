@@ -1,6 +1,6 @@
 # Pi Claude Code review
 
-A local Pi package wrapping Claude Code's **built-in** `/code-review` with a structured `claude_code_review` tool and a `claude-code-review` skill. Implementation is in progress; the manifest declares `extensions/code-review.ts` and `skills/claude-code-review`, which are not yet delivered.
+A local Pi package wrapping Claude Code's **built-in** `/code-review` with a structured `claude_code_review` tool and a `claude-code-review` skill. The manifest delivers `extensions/code-review.ts` and `skills/claude-code-review`. Live integration acceptance is tracked separately; fake-process tests are not evidence of publication support.
 
 ## Prerequisites and compatibility
 
@@ -13,6 +13,49 @@ A local Pi package wrapping Claude Code's **built-in** `/code-review` with a str
 The wrapper attempts whatever Claude CLI is installed. There is no version allowlist or minimum-version gate. A short best-effort `claude --version` probe supplies diagnostics only: an unfamiliar version, malformed output, or failed probe does not prevent a review attempt when the executable exists. Missing executables and actual invocation/protocol failures are reported, without upgrades, alternate semantics, or automatic retries.
 
 The attributed 2.1.296 interface in `openspec/changes/add-claude-code-review-wrapper/design.md` is a reference, **not an installation requirement** or a compatibility guarantee. Captured smoke fixtures document specific observations, not certification of every release. The selected transport is one stream-JSON user message with policy/context in a preceding text block and only the slash command in the final block; it does not use `--append-system-prompt`. See `docs/compatibility-smoke.md` for evidence and limits.
+
+## Local installation and loading
+
+Review the package source and the execution-access warning below before loading it. Install/authenticate Claude separately, ensure its built-in `/code-review` is unshadowed, and install/authenticate `gh` for PRs.
+
+From this checkout:
+
+```sh
+npm ci
+pi -e .
+```
+
+`-e .` loads the package extension and skill for that invocation without changing settings. Or use an absolute checkout path:
+
+```sh
+pi install /absolute/path/to/pi-claude-code-review
+```
+
+Add `--local` for project-scoped installation. Project declarations require project trust; inspect them before granting it. Local packages are loaded in place rather than copied. Pi supplies the declared host peers; `npm ci` installs development dependencies for this checkout.
+
+In Pi, invoke the wrapper explicitly:
+
+```text
+/skill:claude-code-review review PR 123 in owner/project at high effort; focus on correctness
+```
+
+The skill selects `claude_code_review` with `target`, explicit `effort: "high"`, and separate `context`, as shown in the tool examples below. It does not run a shell command. An ordinary request leaves fix/comment disabled. The default permission bypass still applies.
+
+For a one-shot headless request with your configured Pi model:
+
+```sh
+pi -e . --print "/skill:claude-code-review review the current diff"
+```
+
+The same adapter works in interactive and headless modes; it does not require dialogs. A selected PR and context conceptually arrive at Claude as two text blocks in one serialized user-message record:
+
+```json
+{"type":"user","session_id":"","message":{"role":"user","content":[{"type":"text","text":"Wrapper policy plus supplementary guidance: Focus on correctness."},{"type":"text","text":"/code-review high https://github.com/owner/project/pull/123"}]}}
+```
+
+The actual policy is supplied by the runner; multiline context remains JSON data. No context is appended to the target, no initialization handshake occurs, and no prior Pi conversation is synthesized. Normally loaded Claude project instructions still apply.
+
+To disable a temporary load, omit `-e .` next time. For an installed package, use `pi remove /absolute/path/to/pi-claude-code-review` (with `--local` if installed locally), or disable its extension and skill via `pi config`. Restart Pi or `/reload` after changing resource settings. Removing the package does not undo fixes/comments, persisted upstream effort/finding-limit choices, or retained logs. Do not use `pi update` as a remedy for an upstream invocation failure.
 
 ## Execution access
 
